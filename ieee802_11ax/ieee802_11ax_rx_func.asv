@@ -4,6 +4,9 @@ chanBW = cfgHE.ChannelBandwidth;
 fs = wlanSampleRate(cfgHE);
 ofdmInfo = wlanHEOFDMInfo('HE-Data',cfgHE);
 
+rx = rx(2000:6000,1);
+figure
+plot(abs(rx))
 coarsePktOffset = wlanPacketDetect(rx,chanBW);
 
 % Extract L-STF and perform coarse frequency offset correction
@@ -49,13 +52,9 @@ chanEstData = chanEst(ofdmInfo.DataIndices,:,:);
 % Equalization and STBC combining
 [eqDataSym,csi] = heEqualizeCombine(demodDataSym,chanEstData,nVarEst,cfgHE);
 refSym = wlanReferenceSymbols(cfgHE); % Reference constellation
-    bfConst = hePlotConstellation(eqDataSym,refSym,'Equalized Symbols');
+bfConst = hePlotConstellation(eqDataSym,refSym,'Equalized Symbols');
 % Recover data
 data_recv = wlanHEDataBitRecover(eqDataSym,nVarEst,csi,cfgHE);
-
-powHELTF = mean(rxHELTF.*conj(rxHELTF));
-estSigPower = powHELTF - nVarEst;
-snrMeasured = 10*log10(mean(estSigPower./nVarEst));
 
 end
 

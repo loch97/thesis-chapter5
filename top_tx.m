@@ -20,9 +20,9 @@ switch source
         cfgHE.NumTransmitAntennas = 1;
         cfgHE.APEPLength = 500;
         cfgHE.GuardInterval = 0.8;
-        cfgHE.HELTFType = 1;
+        cfgHE.HELTFType = 4;
         cfgHE.ChannelCoding = 'BCC';
-        cfgHE.MCS = 7;
+        cfgHE.MCS = 1;
         psduLength = getPSDULength(cfgHE);
 
         txPSDU = randi([0 1],psduLength*8,1);
@@ -38,7 +38,7 @@ if save_file==1
 end
 %% send to yunsdr
 if send_yunsdr==1
-    yunsdr_init.samp=20e6;                  % sample freq 4e6~61.44e6
+    yunsdr_init.samp=40e6;                  % sample freq 4e6~61.44e6
     yunsdr_init.bw=20e6;                    % tx analog flter  bandwidth 250e3~56e6
     yunsdr_init.freq=4300e6;                % tx LO freq 70e6~6000e6
     yunsdr_init.tx_att1=20e3;               % tx att ch1 0~89e3 mdB

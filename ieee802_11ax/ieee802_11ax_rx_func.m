@@ -52,6 +52,6 @@ refSym = wlanReferenceSymbols(cfgHE); % Reference constellation
 bfConst = hePlotConstellation(eqDataSym,refSym,'Equalized Symbols');
 % Recover data
 data_recv = wlanHEDataBitRecover(eqDataSym,nVarEst,csi,cfgHE);
-
+pause(10);
 end
 
