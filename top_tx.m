@@ -33,6 +33,9 @@ switch source
         fs = wlanSampleRate(cfgHE);
         psdCal(tx_11ax,fs);
         txdata=repmat([zeros(size(tx_11ax));tx_11ax],1,1);
+        c = max(max([abs(real(txdata)),abs(imag(txdata))]));
+        coff = 25000/c;
+        txdata = round(tx.*coff);
         yunsdr_init.txgap=0;
 end
 %% save to file
