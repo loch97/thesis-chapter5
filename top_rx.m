@@ -6,6 +6,7 @@ yunsdr_init.rxsamples=1e6; % receive data in samples
 if contains(source, 'file')
     %% load from file
     rxdata=load_from_file;
+    rxdata = add_user_channel(rxdata,0,20,1);
 else
     %% load from yunsdr
     yunsdr_init.samp=40e6;                 % sample freq 4e6~61.44e6

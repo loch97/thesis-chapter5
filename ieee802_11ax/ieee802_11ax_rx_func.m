@@ -5,7 +5,7 @@ fs = wlanSampleRate(cfgHE);
 ofdmInfo = wlanHEOFDMInfo('HE-Data',cfgHE);
 load('txPSDU.mat','txPSDU','end_time');
 
-num = 5;
+num = 1;
 while(num)
     disp(['Countdown ' num2str(num)])
     figure(1)
