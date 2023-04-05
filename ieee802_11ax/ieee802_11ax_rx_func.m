@@ -3,10 +3,11 @@ ind = wlanFieldIndices(cfgHE);
 chanBW = cfgHE.ChannelBandwidth;
 fs = wlanSampleRate(cfgHE);
 ofdmInfo = wlanHEOFDMInfo('HE-Data',cfgHE);
-load('txPSDU.mat','txPSDU')
+load('txPSDU.mat','txPSDU','end_time');
 
 num = 5;
 while(num)
+    disp(['Countdown ' num2str(num)])
     figure(1)
     clf
     set(gcf,'name','IEEE802.11ax接收端PHY演示')
@@ -23,8 +24,8 @@ while(num)
     % Frame head searching
     coarsePktOffset = wlanPacketDetect(rx,chanBW);
     if isempty(coarsePktOffset)
-        disp(['未检测到数据帧'])
-        continue;
+        disp('未检测到数据帧')
+        break;
     end
 
     % Extract L-STF and perform coarse frequency offset correction
@@ -32,7 +33,7 @@ while(num)
     coarseFreqOff = wlanCoarseCFOEstimate(lstf,chanBW);
     rx = helperFrequencyOffset(rx,fs,-coarseFreqOff);
     subplot(233)
-    plot(abs(rx(1:2080,1)))
+    plot(abs(rx(coarsePktOffset:end_time+coarsePktOffset,1)))
     title('粗同步能量检测');
 
     % Extract the non-HT fields and determine fine packet offset
@@ -47,7 +48,7 @@ while(num)
     fineFreqOff = wlanFineCFOEstimate(rxLLTF,chanBW);
     rx = helperFrequencyOffset(rx,fs,-fineFreqOff);
     subplot(234)
-    plot(abs(rx(1:2080,1)))
+    plot(abs(rx(pktOffset:pktOffset+end_time,1)))
     title('精同步能量检测');
 
     % HE-LTF demodulation and channel estimation
@@ -97,7 +98,7 @@ while(num)
     disp(['Estimated SNR is ' num2str(estimatedSNR)])
     [~,ber] = biterr(rxPSDU,txPSDU);
     disp(['BER of the frame is ' num2str(ber)])
-    rx = rx(2080:end,1);
+    rx = rx(pktOffset+end_time:end,1);
     num = num - 1;
 end
 end

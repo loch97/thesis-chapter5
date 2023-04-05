@@ -1,5 +1,5 @@
 % clearvars -except times;close all;warning off;
-source='yunsdr';% file or yunsdr
+source='file';% file or yunsdr
 data_type='ieee802_11ax';
 yunsdr_init.ipaddr='192.168.1.10';
 yunsdr_init.rxsamples=1e6; % receive data in samples
@@ -13,8 +13,8 @@ else
     yunsdr_init.freq=4300e6;                % rx LO freq 70e6~6000e6
     yunsdr_init.rxgain_mode1='RF_GAIN_MGC'; % RF_GAIN_MGC,RF_GAIN_FASTATTACK_AGC,RF_GAIN_SLOWATTACK_AGC
     yunsdr_init.rxgain_mode2='RF_GAIN_MGC'; % RF_GAIN_MGC,RF_GAIN_FASTATTACK_AGC,RF_GAIN_SLOWATTACK_AGC
-    yunsdr_init.rxgain1=20;                 % rx mgc gain ch1 0~70
-    yunsdr_init.rxgain2=5;                  % rx mgc gain ch2 0~70
+    yunsdr_init.rxgain1=30;                 % rx mgc gain ch1 0~70 dB
+    yunsdr_init.rxgain2=5;                  % rx mgc gain ch2 0~70 dB
     yunsdr_init.fdd_tdd='FDD';              % FDD,TDD
     yunsdr_init.trx_sw='RX';                % TX,RX
     yunsdr_init.rx_chan='RX1_CHANNEL';      % RX1_CHANNEL,RX2_CHANNEL,RX_DUALCHANNEL
@@ -31,9 +31,9 @@ else
     % PPS_EXTERNAL_EN pps from external pps in port
     yunsdr_init.ppsmode='PPS_ALL_DISABLE';   % PPS
     % ************************************** %
-
+    rxdata=load_from_yunsdr(yunsdr_init);
 end
-[rxdata]=load_from_yunsdr(yunsdr_init);
+
 switch data_type
     case 'ieee802_11n'
         upsample=2;
@@ -41,15 +41,15 @@ switch data_type
         [data_byte_recv,sim_options] = ieee802_11n_rx_func(rxdata,upsample);
     case 'ieee802_11ax'
         addpath ieee802_11ax
-%         cfgHE = wlanHESUConfig;
-%         cfgHE.ChannelBandwidth = 'CBW20';
-%         cfgHE.NumSpaceTimeStreams = 1;
-%         cfgHE.NumTransmitAntennas = 1;
-%         cfgHE.APEPLength = 1e3;
-%         cfgHE.GuardInterval = 0.8;
-%         cfgHE.HELTFType = 4;
-%         cfgHE.ChannelCoding = 'BCC';
-%         cfgHE.MCS = 6;
+        %         cfgHE = wlanHESUConfig;
+        %         cfgHE.ChannelBandwidth = 'CBW20';
+        %         cfgHE.NumSpaceTimeStreams = 1;
+        %         cfgHE.NumTransmitAntennas = 1;
+        %         cfgHE.APEPLength = 1e3;
+        %         cfgHE.GuardInterval = 0.8;
+        %         cfgHE.HELTFType = 4;
+        %         cfgHE.ChannelCoding = 'BCC';
+        %         cfgHE.MCS = 6;
         load('config.mat');
         data_rrxPSDUecv = ieee802_11ax_rx_func(rxdata,cfgHE);
 end

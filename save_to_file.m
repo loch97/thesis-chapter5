@@ -1,11 +1,11 @@
-function ret=save_to_file(txd,upsample)
+function ret=save_to_file(tx)
 %% to modelsim
-c1=max(max([abs(real(txd)),abs(imag(txd))]));
+c1=max(max([abs(real(tx)),abs(imag(tx))]));
 index=25000/c1;
-txdata=round(txd.*index);
+txdata=round(tx.*index);
 for i=1:size(txdata,2)
-    file_name=['at',num2str(i)];
-    fid = fopen(['data',file_name,'.txt'], 'wt');
+%     file_name=['at',num2str(i)];
+    fid = fopen('data.txt', 'wt');
     for j=1:size(txdata,1)
         fprintf(fid,'%8.0f%8.0f\n',real(txdata(j,i)),imag(txdata(j,i)));
     end
