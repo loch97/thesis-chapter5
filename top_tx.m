@@ -22,7 +22,7 @@ switch source
         cfgHE.GuardInterval = 0.8;
         cfgHE.HELTFType = 4;
         cfgHE.ChannelCoding = 'BCC';
-        cfgHE.MCS = 4;
+        cfgHE.MCS = 1;
         save('config.mat','cfgHE');
 
         psduLength = getPSDULength(cfgHE);
@@ -37,7 +37,8 @@ switch source
 end
 %% save to file
 if save_file==1
-    ret=save_to_file(txdata,1);
+    ret=save_to_file(txdata);
+    disp(ret)
 end
 %% send to yunsdr
 if send_yunsdr==1
