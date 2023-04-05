@@ -1,18 +1,34 @@
-function data_recv = ieee802_11ax_rx_func(rx,cfgHE)
+function rxPSDU = ieee802_11ax_rx_func(rx,cfgHE)
 ind = wlanFieldIndices(cfgHE);
 chanBW = cfgHE.ChannelBandwidth;
 fs = wlanSampleRate(cfgHE);
 ofdmInfo = wlanHEOFDMInfo('HE-Data',cfgHE);
+load('txPSDU.mat','txPSDU')
 
-rx = rx(2000:6000,1);
-figure
-plot(abs(rx))
+num = 10;
+while(num)
+figure(1)
+clf
+set(gcf,'name','IEEE802.11ax接收端PHY演示')
+subplot(231)
+plot(real(rx(:,1)))
+hold on
+axis([1,size(rx,1),-32768,32767])
+title('原始信号时域波形')
+hold off
+subplot(232)
+pwelch(rx,[],[],[],fs,'centered','psd');
+title('原始信号功率谱密度');
+
+% Frame head searching
 coarsePktOffset = wlanPacketDetect(rx,chanBW);
 
 % Extract L-STF and perform coarse frequency offset correction
 lstf = rx(coarsePktOffset+(ind.LSTF(1):ind.LSTF(2)),:);
 coarseFreqOff = wlanCoarseCFOEstimate(lstf,chanBW);
 rx = helperFrequencyOffset(rx,fs,-coarseFreqOff);
+subplot(233)
+plot()
 
 % Extract the non-HT fields and determine fine packet offset
 nonhtfields = rx(coarsePktOffset+(ind.LSTF(1):ind.LSIG(2)),:);
@@ -20,7 +36,6 @@ finePktOffset = wlanSymbolTimingEstimate(nonhtfields,chanBW);
 
 % Determine final packet offset
 pktOffset = coarsePktOffset+finePktOffset;
-
 
 % Extract L-LTF and perform fine frequency offset correction
 rxLLTF = rx(pktOffset+(ind.LLTF(1):ind.LLTF(2)),:);
@@ -51,10 +66,21 @@ chanEstData = chanEst(ofdmInfo.DataIndices,:,:);
 
 % Equalization and STBC combining
 [eqDataSym,csi] = heEqualizeCombine(demodDataSym,chanEstData,nVarEst,cfgHE);
-refSym = wlanReferenceSymbols(cfgHE); % Reference constellation
-bfConst = hePlotConstellation(eqDataSym,refSym,'Equalized Symbols');
+% refSym = wlanReferenceSymbols(cfgHE); % Reference constellation
+% bfConst = hePlotConstellation(eqDataSym,refSym,'Equalized Symbols');
 % Recover data
-data_recv = wlanHEDataBitRecover(eqDataSym,nVarEst,csi,cfgHE);
+rxPSDU = wlanHEDataBitRecover(eqDataSym,nVarEst,csi,cfgHE);
+pause(10);
 
+% SNR estimation per receive antenna
+powHELTF = mean(rxHELTF.*conj(rxHELTF));
+estSigPower = powHELTF-nVarEst;
+estimatedSNR = 10*log10(mean(estSigPower./nVarEst));
+disp(['Estimated SNR is ' num2str(estimatedSNR)])
+[~,ber] = biterr(rxPSDU,txPSDU);
+disp(['BER of the frame is ' num2str(ber)])
+rx = rx(2080:end,1);
+num = num - 1;
+end
 end
 

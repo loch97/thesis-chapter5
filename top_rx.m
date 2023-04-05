@@ -41,15 +41,15 @@ switch data_type
         [data_byte_recv,sim_options] = ieee802_11n_rx_func(rxdata,upsample);
     case 'ieee802_11ax'
         addpath ieee802_11ax
-        cfgHE = wlanHESUConfig;
-        cfgHE.ChannelBandwidth = 'CBW20';
-        cfgHE.NumSpaceTimeStreams = 1;
-        cfgHE.NumTransmitAntennas = 1;
-        cfgHE.APEPLength = 1e3;
-        cfgHE.GuardInterval = 0.8;
-        cfgHE.HELTFType = 4;
-        cfgHE.ChannelCoding = 'BCC';
-        cfgHE.MCS = 1;
-
-        data_recv = ieee802_11ax_rx_func(rxdata,cfgHE);
+%         cfgHE = wlanHESUConfig;
+%         cfgHE.ChannelBandwidth = 'CBW20';
+%         cfgHE.NumSpaceTimeStreams = 1;
+%         cfgHE.NumTransmitAntennas = 1;
+%         cfgHE.APEPLength = 1e3;
+%         cfgHE.GuardInterval = 0.8;
+%         cfgHE.HELTFType = 4;
+%         cfgHE.ChannelCoding = 'BCC';
+%         cfgHE.MCS = 6;
+        load('config.mat');
+        data_rrxPSDUecv = ieee802_11ax_rx_func(rxdata,cfgHE);
 end
