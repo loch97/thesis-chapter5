@@ -1,2 +1,4 @@
 # ignore all the PDF files
 *.pdf
+*.asv
+RAC/
