@@ -30,7 +30,7 @@ switch source
         psduLength = getPSDULength(cfgHE);
         txPSDU = randi([0 1],psduLength*8,1);
         tx_11ax = wlanWaveformGenerator(txPSDU,cfgHE);
-        disp(['Original signal power is ' num2str(sum(abs(tx_11ax).^2)/length(tx_11ax)) 'W'])
+%         disp(['Original signal power is ' num2str(sum(abs(tx_11ax).^2)/length(tx_11ax)) 'W'])
         end_time = length(tx_11ax);
         save('txPSDU.mat','txPSDU','end_time');
         fs = wlanSampleRate(cfgHE);
@@ -38,7 +38,7 @@ switch source
         c = max(max([abs(real(txdata)),abs(imag(txdata))]));
         coff = 25000/c;
         txdata = round(txdata.*coff);
-%         psdCal(txdata,fs);
+        psdCal(txdata,fs);
 %         P = sum(abs(txdata).^2)/length(txdata)*2;
 %         disp(['Transmitting signal PSD is ' num2str(10*log10(P*1000)) 'dBm']);
 %         spectrumAnalyzer  = dsp.SpectrumAnalyzer('SampleRate',fs, ...

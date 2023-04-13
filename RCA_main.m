@@ -12,7 +12,7 @@ cfgHE.APEPLength = 1000;
 cfgHE.GuardInterval = 0.8;
 cfgHE.HELTFType = 2;
 cfgHE.ChannelCoding = 'BCC';
-cfgHE.MCS = 1;                      % Initial Value of MCS is 2
+cfgHE.MCS = 0;                      % Initial Value of MCS is 2
 snrInd = cfgHE.MCS; % Store the start MCS value
 
 numPkt = 50;
@@ -63,5 +63,5 @@ set(gca,'YLim',[0,1])
 subplot(313)
 plot(1:numPkt,SNRlist,'LineWidth',1)
 xlabel('数据包个数')
-ylabel('估计SNR')
+ylabel('估计SNR(dB)')
 ylim([0 35])

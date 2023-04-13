@@ -1,4 +1,4 @@
-function rxPSDU = ieee802_11ax_rx_func(rx,cfgHE)
+function rxPSDU = ieee802_11ax_rx_func_res(rx,cfgHE)
 
 %% EVM configuration
 EVM = comm.EVM;
@@ -16,16 +16,17 @@ load('txPSDU.mat','txPSDU','end_time');
 
 num = 1;
 while(num)
-    disp(['Countdown ' num2str(num)])
-    figure('name','IEEE802.11ax接收端PHY演示')
-    clf
-    subplot(241)
+    disp(['Countdown Num: ' num2str(num)])
+%     figure('name','IEEE802.11ax接收端PHY演示')
+    figure(1)
+    subplot(121)
     plot(1:size(rx(:,1)),real(rx(:,1)))
-    hold on
     axis([1,size(rx,1),-32768,32767])
     title('接收信号时域波形')
-    hold off
-    subplot(242)
+    xlabel('时间')
+    ylabel('数值')
+    figure(2)
+    subplot(121)
     pwelch(rx,[],[],[],fs,'centered','psd');
     title('接收信号功率谱密度');
 
@@ -40,10 +41,13 @@ while(num)
     lstf = rx(coarsePktOffset+(ind.LSTF(1):ind.LSTF(2)),:);
     coarseFreqOff = wlanCoarseCFOEstimate(lstf,chanBW);
     rx = helperFrequencyOffset(rx,fs,-coarseFreqOff);
-    subplot(243)
+    figure(3)
+    subplot(121)
     plot(1:size(coarsePktOffset:end_time+coarsePktOffset,2),abs(rx(coarsePktOffset:end_time+coarsePktOffset,1)))
     title('粗同步信号时域波形');
     set(gca,'XLim', [0 end_time])
+    xlabel('时间')
+    ylabel('数值')
 
     % Extract the non-HT fields and determine fine packet offset
     nonhtfields = rx(coarsePktOffset+(ind.LSTF(1):ind.LSIG(2)),:);
@@ -56,18 +60,24 @@ while(num)
     rxLLTF = rx(pktOffset+(ind.LLTF(1):ind.LLTF(2)),:);
     fineFreqOff = wlanFineCFOEstimate(rxLLTF,chanBW);
     rx = helperFrequencyOffset(rx,fs,-fineFreqOff);
-    subplot(245)
+    figure(3)
+    subplot(122)
     plot(1:size(pktOffset:pktOffset+end_time,2),abs(rx(pktOffset:pktOffset+end_time,1)))
     title('精同步信号时域波形');
     set(gca,'XLim', [0 end_time])
+    xlabel('时间')
+    ylabel('数值')
 
     % HE-LTF demodulation and channel estimation
     rxHELTF = rx(pktOffset+(ind.HELTF(1):ind.HELTF(2)),:);
     heltfDemod = wlanHEDemodulate(rxHELTF,'HE-LTF',cfgHE);
     [chanEst,pilotEst] = heLTFChannelEstimate(heltfDemod,cfgHE);
-    subplot(246)
+    figure(2)
+    subplot(122)
     plot(1:length(chanEst),20*log10(abs(chanEst)))
     title('HE-LTF信道估计结果');
+    xlabel('子载波个数')
+    ylabel('信道估计数值(dB)')
     set(gca,'XLim', [0 length(chanEst)])
 
     % Data demodulate
@@ -93,7 +103,8 @@ while(num)
     % bfConst = hePlotConstellation(eqDataSym,refSym,'Equalized Symbols');
     [Nsd,NSym,Nss] = size(eqDataSym);
     symPlot = squeeze(reshape(eqDataSym(:,:,end:-1:1),Nsd*NSym,1,Nss));
-    subplot(247)
+    figure(1)
+    subplot(122)
     plot(real(symPlot(:,1)),imag(symPlot(:,1)),'.');
     axis([-1.5,1.5,-1.5,1.5]);
     title('信道均衡后星座图');
@@ -105,28 +116,26 @@ while(num)
     powHELTF = mean(rxHELTF.*conj(rxHELTF));
     estSigPower = powHELTF-nVarEst;
     estimatedSNR = 10*log10(mean(estSigPower./nVarEst));
-    disp(['Estimated SNR is ' num2str(estimatedSNR)])
+%     disp(['Estimated SNR is ' num2str(estimatedSNR)])
     [~,ber] = biterr(rxPSDU,txPSDU);
     disp(['BER of the frame is ' num2str(ber)])
     rmsEVM = EVM(eqDataSym);
-    disp(['rmsEVM of the frame is ' num2str(rmsEVM) '% or ' num2str(20*log10(rmsEVM/100)) 'dB'])
+%     disp(['rmsEVM of the frame is ' num2str(rmsEVM) '% or ' num2str(20*log10(rmsEVM/100)) 'dB'])
     [codeRate,modOrder,name] = getMCSparameter(cfgHE);
-    subplot(248)
-    axis off
-    title('通信系统参数')
-    text(0.1,0.9,['MCS: ' num2str(cfgHE.MCS) ',调制方式: ' num2str(name) ',码率: ' codeRate])
-    text(0.1,0.7,['传输速率: ' num2str(8*cfgHE.APEPLength*(ber == 0)/sum(end_time/fs)/1e6) 'Mbps'])
-    text(0.1,0.5,['接收端估计SNR: ' num2str(estimatedSNR) 'dB'])
-    text(0.1,0.3,['BER: ' num2str(ber)])
-    text(0.1,0.1,['data星座图EVM: ',num2str(20*log10(rmsEVM/100)) 'dB'])
-    GAP = -1.5/log(5*BERthre);
+    disp('---------通信系统参数---------')
+    disp(['MCS: ' num2str(cfgHE.MCS) ',调制方式: ' num2str(name) ',码率: ' codeRate])
+    disp(['传输速率: ' num2str(8*cfgHE.APEPLength*(ber == 0)/sum(end_time/fs)/1e6) 'Mbps'])
+    disp(['接收端估计SNR: ' num2str(estimatedSNR) 'dB'])
+    disp(['当前接收数据帧的BER: ' num2str(ber)])
+    disp(['接收数据星座图的EVM: ',num2str(20*log10(rmsEVM/100)) 'dB'])
+%     GAP = -1.5/log(5*BERthre);
 %     text(0.1,0.2,['遍历容量（带GAP）: ' num2str(20e6*log2(1+10^(estimatedSNR/10)/GAP)/1e6) 'Mbps'])
 %     text(0.1,0.4,['精频偏估计值: ' num2str(fineFreqOff)])
     num = num - 1;
     RXdata = rx(pktOffset:pktOffset+end_time);
     rx = rx(pktOffset+end_time:end,1);
     P = sum(abs(RXdata).^2)/length(end_time);
-    disp(['Received Signal Power is ' num2str(10*log10(1000*P)) 'dbm'])
+%     disp(['Received Signal Power is ' num2str(10*log10(1000*P)) 'dbm'])
 end
 end
 
