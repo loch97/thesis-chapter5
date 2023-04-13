@@ -1,12 +1,12 @@
 % clearvars -except times;close all;warning off;
-source='file';% file or yunsdr
+source='yunsdr';% file or yunsdr
 data_type='ieee802_11ax';
 yunsdr_init.ipaddr='192.168.1.10';
-yunsdr_init.rxsamples=1e6; % receive data in samples
+yunsdr_init.rxsamples=1e5; % receive data in samples
 if contains(source, 'file')
     %% load from file
     rxdata=load_from_file;
-    rxdata = add_user_channel(rxdata,0,30,1);
+    rxdata = add_user_channel(rxdata,0,7,1);
 else
     %% load from yunsdr
     yunsdr_init.samp=40e6;                 % sample freq 4e6~61.44e6
@@ -52,5 +52,10 @@ switch data_type
         %         cfgHE.ChannelCoding = 'BCC';
         %         cfgHE.MCS = 6;
         load('config.mat');
+%         spectrumAnalyzer  = dsp.SpectrumAnalyzer('SampleRate',fs, ...
+%             'AveragingMethod','Exponential','ForgettingFactor',0.99, ...
+%             'YLimits',[-30 10],'ShowLegend',true, ...
+%             'ChannelNames',{'Transmitted waveform','Received waveform'});
+%         spectrumAnalyzer(rxdata);
         data_recv = ieee802_11ax_rx_func(rxdata,cfgHE);
 end

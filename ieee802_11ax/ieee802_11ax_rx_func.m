@@ -7,6 +7,7 @@ EVM.Normalization = "Average constellation power";
 EVM.ReferenceConstellation = wlanReferenceSymbols(cfgHE);
 EVM.AveragingDimensions = [1 2 3];
 
+BERthre = 1e-6;
 ind = wlanFieldIndices(cfgHE);
 chanBW = cfgHE.ChannelBandwidth;
 fs = wlanSampleRate(cfgHE);
@@ -114,12 +115,18 @@ while(num)
     axis off
     title('通信系统参数')
     text(0.1,0.9,['MCS: ' num2str(cfgHE.MCS) ',调制方式: ' num2str(name) ',码率: ' codeRate])
-    text(0.1,0.7,['传输速率: ' num2str(8*cfgHE.APEPLength*(ber == 0)/sum(size(rx)/fs)/1e6) 'Mbps'])
+    text(0.1,0.7,['传输速率: ' num2str(8*cfgHE.APEPLength*(ber == 0)/sum(end_time/fs)/1e6) 'Mbps'])
     text(0.1,0.5,['接收端估计SNR: ' num2str(estimatedSNR) 'dB'])
     text(0.1,0.3,['BER: ' num2str(ber)])
-    text(0.1,0.1,['data星座图EVM: ',num2str(20*log10(rmsEVM/100)) 'dB']);
+    text(0.1,0.1,['data星座图EVM: ',num2str(20*log10(rmsEVM/100)) 'dB'])
+    GAP = -1.5/log(5*BERthre);
+%     text(0.1,0.2,['遍历容量（带GAP）: ' num2str(20e6*log2(1+10^(estimatedSNR/10)/GAP)/1e6) 'Mbps'])
+%     text(0.1,0.4,['精频偏估计值: ' num2str(fineFreqOff)])
     num = num - 1;
+    RXdata = rx(pktOffset:pktOffset+end_time);
     rx = rx(pktOffset+end_time:end,1);
+    P = sum(abs(RXdata).^2)/length(end_time);
+    disp(['Received Signal Power is ' num2str(10*log10(1000*P)) 'dbm'])
 end
 end
 
